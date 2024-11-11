@@ -22,7 +22,7 @@ export default function Home() {
         .slice(startIndex + 1, endIndex)
         .filter((line: any) => line.trim() !== "")
         .map((line: string) => {
-          let ary: any = [];
+          const ary: any = [];
           const [time, data] = line.split(/\s*\[.*?\]\s*/);
           ary.push(time);
           for (let i = 0; i < data.length; i++) {
