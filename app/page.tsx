@@ -16,7 +16,8 @@ const getLog = async (name: any, number: any, team?: any) => {
     );
     return data;
   } catch (error) {
-    console.log(error);
+    throw error;
+    // console.log(error);
   }
 };
 
@@ -53,9 +54,9 @@ const extractResolvedFiles = (log: any) => {
 export default function Home() {
   const [page, setPage] = useState("single");
 
-  useEffect(() => {
-    getLog("tancis-batch-com", "180");
-  }, []);
+  // useEffect(() => {
+  //   getLog("tancis-batch-com", "180");
+  // }, []);
 
   return (
     <div className="flex">
@@ -115,7 +116,7 @@ const Multiple = () => {
       try {
         log = await getLog(name, number, team);
       } catch (error) {
-        console.log(error);
+        console.log(name, number, team);
       }
 
       if (log) {
@@ -154,7 +155,6 @@ const Multiple = () => {
             </button>
             <div className="gap-1 flex flex-col">
               {list.map((item, index) => {
-                console.log(item);
                 const [name, number, team] = item;
                 return (
                   <div key={name} className="text-sm flex gap-1">
