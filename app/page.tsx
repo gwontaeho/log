@@ -155,14 +155,9 @@ const Multiple = () => {
             <div className="gap-1 flex flex-col">
               {list.map((item, index) => {
                 console.log(item);
-                const [team, name, number] = item;
+                const [name, number, team] = item;
                 return (
                   <div key={name} className="text-sm flex gap-1">
-                    <input
-                      name={`${index}!@#$team`}
-                      className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
-                      defaultValue={team}
-                    />
                     <input
                       name={`${index}!@#$name`}
                       className="h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
@@ -172,6 +167,11 @@ const Multiple = () => {
                       name={`${index}!@#$number`}
                       className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
                       defaultValue={number}
+                    />
+                    <input
+                      name={`${index}!@#$team`}
+                      className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                      defaultValue={team}
                     />
                   </div>
                 );
