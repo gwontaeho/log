@@ -10,7 +10,7 @@ export default function Home() {
     getLog();
   }, []);
 
-  const username = "TANCIS ADMIN";
+  const username = "tancisadmin";
   const apiToken = "113ce39804adfcd9ac18f955e6755d0653";
   const authString = `${username}:${apiToken}`;
   const authBase64 = Buffer.from(authString).toString("base64");
