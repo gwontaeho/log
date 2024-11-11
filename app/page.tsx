@@ -23,7 +23,7 @@ export default function Home() {
         .filter((line: any) => line.trim() !== "")
         .map((line: string) => {
           const ary: any = [];
-          const [time, data] = line.split(/\s*\[.*?\]\s*/);
+          const [time, data] = line.split("[INFO]");
           ary.push(time);
           for (let i = 0; i < data.length; i++) {
             ary.push(data.split(":")[i]);
@@ -40,6 +40,8 @@ export default function Home() {
     const formData = new FormData(event.target);
     const textarea = formData.get("textarea");
     const extracted = extractResolvedFiles(textarea);
+
+    console.log(extracted);
 
     const worksheet = XLSX.utils.aoa_to_sheet(extracted);
     const workbook = XLSX.utils.book_new();
