@@ -1,9 +1,32 @@
 "use client";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 
 export default function Home() {
   const [page, setPage] = useState("single");
+
+  useEffect(() => {
+    getLog();
+  }, []);
+
+  const username = "TANCIS ADMIN";
+  const apiToken = "113ce39804adfcd9ac18f955e6755d0653";
+  const authString = `${username}:${apiToken}`;
+  const authBase64 = Buffer.from(authString).toString("base64");
+
+  const getLog = async () => {
+    try {
+      const response = await axios.get(
+        "/jenkins/job/tancis-framework/372/consoleText",
+        { headers: { Authorization: `Basic ${authBase64}` } }
+      );
+
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="flex">

@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/jenkins/:path*",
-        destination: "http://jenkins.singlewindow.info:30143/:path*",
+        destination: "https://jenkins.singlewindow.info:30143/:path*",
       },
     ];
   },
