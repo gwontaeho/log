@@ -108,7 +108,7 @@ const Multiple = () => {
       }, {})
     );
 
-    let workbook: any;
+    const workbook = XLSX.utils.book_new();
     for (const item of matched) {
       const { name, number } = item as any;
       let log: any;
@@ -120,7 +120,6 @@ const Multiple = () => {
       }
       const extracted = extractResolvedFiles(log);
       const worksheet = XLSX.utils.aoa_to_sheet(extracted);
-      workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, name);
       worksheet["!cols"] = [{ wch: 30 }, { wch: 30 }, { wch: 30 }];
     }
