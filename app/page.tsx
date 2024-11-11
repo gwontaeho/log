@@ -116,12 +116,14 @@ const Multiple = () => {
         log = await getLog(name, number);
       } catch (error) {
         console.log(error);
-        continue;
       }
-      const extracted = extractResolvedFiles(log);
-      const worksheet = XLSX.utils.aoa_to_sheet(extracted);
-      XLSX.utils.book_append_sheet(workbook, worksheet, name);
-      worksheet["!cols"] = [{ wch: 30 }, { wch: 30 }, { wch: 30 }];
+
+      if (log) {
+        const extracted = extractResolvedFiles(log);
+        const worksheet = XLSX.utils.aoa_to_sheet(extracted);
+        XLSX.utils.book_append_sheet(workbook, worksheet, name);
+        worksheet["!cols"] = [{ wch: 30 }, { wch: 30 }, { wch: 30 }];
+      }
     }
 
     XLSX.writeFile(workbook, `Resolved.xlsx`, { compression: true });
