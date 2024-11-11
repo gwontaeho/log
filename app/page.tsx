@@ -115,8 +115,9 @@ const Multiple = () => {
       let log: any;
       try {
         log = await getLog(name, number, team);
+        console.log(name, number, team, "success");
       } catch (error) {
-        console.log(name, number, team);
+        console.log(name, number, team, "failure");
       }
 
       if (log) {
