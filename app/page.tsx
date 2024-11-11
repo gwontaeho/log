@@ -84,12 +84,11 @@ const Multiple = () => {
     const formData = new FormData(event.target);
     const list = formData.get("list") as string;
     const listLines = list.split("\n");
-    console.log(listLines);
     const _ = listLines
       .map((item) => {
         return item.replaceAll(" ", "").split("\t");
       })
-      .filter(([, name, number]) => {
+      .filter(([name, number]) => {
         return name && number;
       });
     setList(_);
