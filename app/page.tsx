@@ -11,7 +11,7 @@ const authBase64 = Buffer.from(authString).toString("base64");
 const getLog = async (name: any, number: any, team?: any) => {
   try {
     const { data } = await axios.get(
-      `/jenkins/${team ? `job/${team}` : ""}job/${name}/${number}/consoleText`,
+      `/jenkins/${team ? `job/${team}/` : ""}job/${name}/${number}/consoleText`,
       { headers: { Authorization: `Basic ${authBase64}` } }
     );
     return data;
