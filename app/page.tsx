@@ -3,30 +3,59 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 
+const username = "tancisadmin";
+const apiToken = "113ce39804adfcd9ac18f955e6755d0653";
+const authString = `${username}:${apiToken}`;
+const authBase64 = Buffer.from(authString).toString("base64");
+
+const getLog = async (name: any, number: any) => {
+  try {
+    const { data } = await axios.get(
+      `/jenkins/job/${name}/${number}/consoleText`,
+      { headers: { Authorization: `Basic ${authBase64}` } }
+    );
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const extractResolvedFiles = (log: any) => {
+  const startMarker = "The following files have been resolved:";
+  const endMarker = "BUILD SUCCESS";
+
+  const logLines = log.split("\n");
+
+  const startIndex = logLines.findIndex((line: any) =>
+    line.includes(startMarker)
+  );
+  const endIndex =
+    logLines.findIndex((line: any) => line.includes(endMarker)) - 2;
+
+  if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
+    return logLines
+      .slice(startIndex + 1, endIndex)
+      .filter((line: any) => line.trim() !== "")
+      .map((line: string) => {
+        const ary: any = [];
+        const [time, data] = line.split("[INFO]");
+        ary.push(time);
+        for (let i = 0; i < data.length; i++) {
+          ary.push(data.split(":")[i]);
+        }
+        return ary;
+      });
+  } else {
+    return [];
+  }
+};
+
 export default function Home() {
   const [page, setPage] = useState("single");
 
   useEffect(() => {
-    getLog();
+    getLog("tancis-batch-com", "180");
   }, []);
-
-  const username = "tancisadmin";
-  const apiToken = "113ce39804adfcd9ac18f955e6755d0653";
-  const authString = `${username}:${apiToken}`;
-  const authBase64 = Buffer.from(authString).toString("base64");
-
-  const getLog = async () => {
-    try {
-      const response = await axios.get(
-        "/jenkins/job/tancis-framework/372/consoleText",
-        { headers: { Authorization: `Basic ${authBase64}` } }
-      );
-
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   return (
     <div className="flex">
@@ -65,18 +94,32 @@ const Multiple = () => {
     setList(_);
   };
 
-  const handleSubmit2 = (event: any) => {
+  const handleSubmit2 = async (event: any) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const entries = Object.entries(Object.fromEntries(formData.entries()));
-    const matched = entries.reduce((prev: any, curr: any) => {
-      const [key, value]: any = curr;
-      const [index, target] = key.split("!@#$");
-      if (!prev[index]) prev[index] = {};
-      prev[index][target] = value;
-      return prev;
-    }, {});
-    console.log(matched);
+    const matched = Object.values(
+      entries.reduce((prev: any, curr: any) => {
+        const [key, value]: any = curr;
+        const [index, target] = key.split("!@#$");
+        if (!prev[index]) prev[index] = {};
+        prev[index][target] = value;
+        return prev;
+      }, {})
+    );
+
+    let workbook: any;
+    for (const item of matched) {
+      const { name, number } = item as any;
+      const log = await getLog(name, number);
+      const extracted = extractResolvedFiles(log);
+      const worksheet = XLSX.utils.aoa_to_sheet(extracted);
+      workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, name);
+      worksheet["!cols"] = [{ wch: 30 }, { wch: 30 }, { wch: 30 }];
+    }
+
+    XLSX.writeFile(workbook, `Resolved.xlsx`, { compression: true });
   };
 
   return (
@@ -129,36 +172,6 @@ const Multiple = () => {
 };
 
 const Single = () => {
-  const extractResolvedFiles = (log: any) => {
-    const startMarker = "The following files have been resolved:";
-    const endMarker = "BUILD SUCCESS";
-
-    const logLines = log.split("\n");
-
-    const startIndex = logLines.findIndex((line: any) =>
-      line.includes(startMarker)
-    );
-    const endIndex =
-      logLines.findIndex((line: any) => line.includes(endMarker)) - 2;
-
-    if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
-      return logLines
-        .slice(startIndex + 1, endIndex)
-        .filter((line: any) => line.trim() !== "")
-        .map((line: string) => {
-          const ary: any = [];
-          const [time, data] = line.split("[INFO]");
-          ary.push(time);
-          for (let i = 0; i < data.length; i++) {
-            ary.push(data.split(":")[i]);
-          }
-          return ary;
-        });
-    } else {
-      return [];
-    }
-  };
-
   const handleSubmit = (event: any) => {
     event.preventDefault();
     const formData = new FormData(event.target);
