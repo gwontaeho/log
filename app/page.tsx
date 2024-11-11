@@ -1,10 +1,111 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 
 export default function Home() {
-  useEffect(() => {}, []);
+  const [page, setPage] = useState("single");
 
+  return (
+    <div className="flex">
+      <div className="w-[200px] p-8 text-lg flex flex-col gap-4 [&_button]:h-10 hover:[&_button]:underline">
+        <button type="button" onClick={() => setPage("single")}>
+          Single
+        </button>
+        <button type="button" onClick={() => setPage("multiple")}>
+          Multiple
+        </button>
+      </div>
+
+      <div className="flex-1 p-16">
+        {page === "single" && <Single />}
+        {page === "multiple" && <Multiple />}
+      </div>
+    </div>
+  );
+}
+
+const Multiple = () => {
+  const [list, setList] = useState<any[]>([]);
+
+  const handleSubmit1 = (event: any) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const list = formData.get("list") as string;
+    const listLines = list.split("\n");
+    const _ = listLines
+      .map((item) => {
+        return item.replaceAll(" ", "").split("\t");
+      })
+      .filter(([name, number]) => {
+        return name !== "" && number !== "";
+      });
+    setList(_);
+  };
+
+  const handleSubmit2 = (event: any) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const entries = Object.entries(Object.fromEntries(formData.entries()));
+    const matched = entries.reduce((prev: any, curr: any) => {
+      const [key, value]: any = curr;
+      const [index, target] = key.split("!@#$");
+      if (!prev[index]) prev[index] = {};
+      prev[index][target] = value;
+      return prev;
+    }, {});
+    console.log(matched);
+  };
+
+  return (
+    <div className="flex gap-4">
+      <form className="flex-1 flex flex-col gap-8" onSubmit={handleSubmit1}>
+        <span>Paste job & build number</span>
+        <div className="flex-1 flex flex-col gap-4">
+          <button className="border h-10 w-20 hover:border-green-600">
+            Execute
+          </button>
+          <textarea
+            name="list"
+            spellCheck="false"
+            className="text-sm p-1 h-[500px] w-full border outline-none focus:border-green-600 hover:border-green-600"
+          />
+        </div>
+      </form>
+
+      {!!list.length && (
+        <form className="flex-1 flex flex-col gap-8" onSubmit={handleSubmit2}>
+          <span>Export</span>
+          <div className="flex flex-col gap-4">
+            <button className="border h-10 w-20 hover:border-green-600">
+              Export
+            </button>
+            <div className="gap-1 flex flex-col">
+              {list.map((item, index) => {
+                const [name, number] = item;
+                return (
+                  <div key={name} className="text-sm flex gap-1">
+                    <input
+                      name={`${index}!@#$name`}
+                      className="h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                      defaultValue={name}
+                    />
+                    <input
+                      name={`${index}!@#$number`}
+                      className="h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                      defaultValue={number}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+};
+
+const Single = () => {
   const extractResolvedFiles = (log: any) => {
     const startMarker = "The following files have been resolved:";
     const endMarker = "BUILD SUCCESS";
@@ -50,26 +151,25 @@ export default function Home() {
   };
 
   return (
-    <form
-      className="p-8 flex flex-col items-center gap-8"
-      onSubmit={handleSubmit}
-    >
-      <span>File name 👇</span>
+    <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
+      <span>File name</span>
       <input
         name="name"
         className="h-10 border p-1 outline-none focus:border-green-600 hover:border-green-600"
         placeholder="Resolved"
       />
-      <span>Paste log here 👇</span>
-      <textarea
-        name="log"
-        spellCheck="false"
-        className="text-sm p-1 h-[500px] w-full border outline-none focus:border-green-600 hover:border-green-600"
-        placeholder="log..."
-      />
-      <button className="border h-10 w-20 hover:border-green-600">
-        Export
-      </button>
+      <span>Paste log here</span>
+      <div className="flex flex-col gap-4">
+        <button className="border h-10 w-20 hover:border-green-600">
+          Export
+        </button>
+        <textarea
+          name="log"
+          spellCheck="false"
+          className="text-sm p-1 h-[500px] w-full border outline-none focus:border-green-600 hover:border-green-600"
+          placeholder="log..."
+        />
+      </div>
     </form>
   );
-}
+};
