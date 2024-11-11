@@ -41,8 +41,6 @@ export default function Home() {
     const textarea = formData.get("textarea");
     const extracted = extractResolvedFiles(textarea);
 
-    console.log(extracted);
-
     const worksheet = XLSX.utils.aoa_to_sheet(extracted);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Logs");
