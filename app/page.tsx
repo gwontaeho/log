@@ -111,7 +111,13 @@ const Multiple = () => {
     let workbook: any;
     for (const item of matched) {
       const { name, number } = item as any;
-      const log = await getLog(name, number);
+      let log: any;
+      try {
+        log = await getLog(name, number);
+      } catch (error) {
+        console.log(error);
+        continue;
+      }
       const extracted = extractResolvedFiles(log);
       const worksheet = XLSX.utils.aoa_to_sheet(extracted);
       workbook = XLSX.utils.book_new();
