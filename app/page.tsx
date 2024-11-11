@@ -8,10 +8,10 @@ const apiToken = "113ce39804adfcd9ac18f955e6755d0653";
 const authString = `${username}:${apiToken}`;
 const authBase64 = Buffer.from(authString).toString("base64");
 
-const getLog = async (name: any, number: any) => {
+const getLog = async (name: any, number: any, team?: any) => {
   try {
     const { data } = await axios.get(
-      `/jenkins/job/${name}/${number}/consoleText`,
+      `/jenkins/${team ? `job/${team}` : ""}job/${name}/${number}/consoleText`,
       { headers: { Authorization: `Basic ${authBase64}` } }
     );
     return data;
@@ -84,12 +84,13 @@ const Multiple = () => {
     const formData = new FormData(event.target);
     const list = formData.get("list") as string;
     const listLines = list.split("\n");
+    console.log(listLines);
     const _ = listLines
       .map((item) => {
         return item.replaceAll(" ", "").split("\t");
       })
-      .filter(([name, number]) => {
-        return name !== "" && number !== "";
+      .filter(([, name, number]) => {
+        return name && number;
       });
     setList(_);
   };
@@ -110,10 +111,10 @@ const Multiple = () => {
 
     const workbook = XLSX.utils.book_new();
     for (const item of matched) {
-      const { name, number } = item as any;
+      const { team, name, number } = item as any;
       let log: any;
       try {
-        log = await getLog(name, number);
+        log = await getLog(name, number, team);
       } catch (error) {
         console.log(error);
       }
@@ -154,9 +155,15 @@ const Multiple = () => {
             </button>
             <div className="gap-1 flex flex-col">
               {list.map((item, index) => {
-                const [name, number] = item;
+                console.log(item);
+                const [team, name, number] = item;
                 return (
                   <div key={name} className="text-sm flex gap-1">
+                    <input
+                      name={`${index}!@#$team`}
+                      className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                      defaultValue={team}
+                    />
                     <input
                       name={`${index}!@#$name`}
                       className="h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
@@ -164,7 +171,7 @@ const Multiple = () => {
                     />
                     <input
                       name={`${index}!@#$number`}
-                      className="h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                      className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
                       defaultValue={number}
                     />
                   </div>
