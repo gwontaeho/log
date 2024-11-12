@@ -22,7 +22,7 @@ const getLog = async (name: any, number: any, team?: any) => {
   }
 };
 
-const extractResolvedFiles = (log: any, name: any) => {
+const extractResolvedFiles = (log: any, name?: any) => {
   const startMarker = "The following files have been resolved:";
   const endMarker = "BUILD SUCCESS";
 
@@ -216,7 +216,7 @@ const Single = () => {
     const formData = new FormData(event.target);
     const name = (formData.get("name") || "Resolved") as string;
     const log = formData.get("log");
-    const extracted = extractResolvedFiles(log);
+    const extracted = extractResolvedFiles(log, name);
 
     const worksheet = XLSX.utils.aoa_to_sheet(extracted);
     const workbook = XLSX.utils.book_new();
