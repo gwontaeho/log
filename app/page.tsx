@@ -22,12 +22,11 @@ const getLog = async (name: any, number: any, team?: any) => {
   }
 };
 
-const extractResolvedFiles = (log: any) => {
+const extractResolvedFiles = (log: any, name: any) => {
   const startMarker = "The following files have been resolved:";
   const endMarker = "BUILD SUCCESS";
 
   const logLines = log.split("\n");
-
   const startIndex = logLines.findIndex((line: any) =>
     line.includes(startMarker)
   );
@@ -41,7 +40,8 @@ const extractResolvedFiles = (log: any) => {
       .map((line: string) => {
         const ary: any = [];
         const [time, data] = line.split("[INFO]");
-        ary.push(time);
+        // ary.push(time);
+        ary.push(name);
         for (let i = 0; i < data.length; i++) {
           ary.push(data.split(":")[i]);
         }
@@ -109,6 +109,7 @@ const Multiple = () => {
 
     setLoading(true);
     const workbook = XLSX.utils.book_new();
+    let all = [];
     for (const item of matched) {
       const { team, name, number } = item as any;
       let log: any;
@@ -118,15 +119,14 @@ const Multiple = () => {
       } catch (error) {
         console.log(name, number, team, "failure");
       }
-
       if (log) {
-        const extracted = extractResolvedFiles(log);
-        const worksheet = XLSX.utils.aoa_to_sheet(extracted);
-        XLSX.utils.book_append_sheet(workbook, worksheet, name);
-        worksheet["!cols"] = [{ wch: 30 }, { wch: 30 }, { wch: 30 }];
+        const extracted = extractResolvedFiles(log, name);
+        all.push(...extracted);
       }
     }
-
+    const worksheet = XLSX.utils.aoa_to_sheet(all);
+    XLSX.utils.book_append_sheet(workbook, worksheet);
+    worksheet["!cols"] = [{ wch: 30 }, { wch: 30 }, { wch: 30 }];
     XLSX.writeFile(workbook, `Resolved.xlsx`, { compression: true });
     setLoading(false);
   };
