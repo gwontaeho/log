@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import * as XLSX from "xlsx";
 
 const username = "tancisadmin";
@@ -74,6 +75,7 @@ export default function Home() {
 }
 
 const Multiple = () => {
+  const [loading, setLoading] = useState(false);
   const [list, setList] = useState<any[]>([]);
 
   const handleSubmit1 = (event: any) => {
@@ -105,6 +107,7 @@ const Multiple = () => {
       }, {})
     );
 
+    setLoading(true);
     const workbook = XLSX.utils.book_new();
     for (const item of matched) {
       const { team, name, number } = item as any;
@@ -125,58 +128,84 @@ const Multiple = () => {
     }
 
     XLSX.writeFile(workbook, `Resolved.xlsx`, { compression: true });
+    setLoading(false);
   };
 
   return (
-    <div className="flex gap-4">
-      <form className="flex-1 flex flex-col gap-8" onSubmit={handleSubmit1}>
-        <span>Paste job & build number</span>
-        <div className="flex-1 flex flex-col gap-4">
-          <button className="border h-10 w-20 hover:border-green-600">
-            Execute
-          </button>
-          <textarea
-            name="list"
-            spellCheck="false"
-            className="text-sm p-1 h-[500px] w-full border outline-none focus:border-green-600 hover:border-green-600"
-          />
-        </div>
-      </form>
-
-      {!!list.length && (
-        <form className="flex-1 flex flex-col gap-8" onSubmit={handleSubmit2}>
-          <span>Export</span>
-          <div className="flex flex-col gap-4">
+    <>
+      <div className="flex gap-4">
+        <form className="flex-1 flex flex-col gap-8" onSubmit={handleSubmit1}>
+          <span>Paste job & build number</span>
+          <div className="flex-1 flex flex-col gap-4">
             <button className="border h-10 w-20 hover:border-green-600">
-              Export
+              Execute
             </button>
-            <div className="gap-1 flex flex-col">
-              {list.map((item, index) => {
-                const [name, number, team] = item;
-                return (
-                  <div key={name} className="text-sm flex gap-1">
-                    <input
-                      name={`${index}!@#$name`}
-                      className="h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
-                      defaultValue={name}
-                    />
-                    <input
-                      name={`${index}!@#$number`}
-                      className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
-                      defaultValue={number}
-                    />
-                    <input
-                      name={`${index}!@#$team`}
-                      className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
-                      defaultValue={team}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+            <textarea
+              name="list"
+              spellCheck="false"
+              className="text-sm p-1 h-[500px] w-full border outline-none focus:border-green-600 hover:border-green-600"
+            />
           </div>
         </form>
-      )}
+
+        {!!list.length && (
+          <form className="flex-1 flex flex-col gap-8" onSubmit={handleSubmit2}>
+            <span>Export</span>
+            <div className="flex flex-col gap-4">
+              <button className="border h-10 w-20 hover:border-green-600">
+                Export
+              </button>
+              <div className="gap-1 flex flex-col">
+                {list.map((item, index) => {
+                  const [name, number, team] = item;
+                  return (
+                    <div key={name} className="text-sm flex gap-1">
+                      <input
+                        name={`${index}!@#$name`}
+                        className="h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                        defaultValue={name}
+                      />
+                      <input
+                        name={`${index}!@#$number`}
+                        className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                        defaultValue={number}
+                      />
+                      <input
+                        name={`${index}!@#$team`}
+                        className="w-20 h-8 border p-1 outline-none focus:border-green-600 hover:border-green-600"
+                        defaultValue={team}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </form>
+        )}
+      </div>
+      {loading && createPortal(<Loading />, document.body)}
+    </>
+  );
+};
+
+const Loading = () => {
+  const [dot, setDot] = useState(0);
+
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      setDot((prev) => (prev += 1));
+    }, 1000);
+
+    return () => {
+      clearInterval(timerId);
+    };
+  }, []);
+
+  const dots = [...new Array(dot % 4).fill(".")];
+
+  return (
+    <div className="fixed w-screen h-screen top-0 left-0 bg-black/20 flex items-center justify-center text-7xl text-white">
+      Loading{dots}
     </div>
   );
 };
