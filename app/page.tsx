@@ -54,10 +54,6 @@ const extractResolvedFiles = (log: any) => {
 export default function Home() {
   const [page, setPage] = useState("single");
 
-  // useEffect(() => {
-  //   getLog("tancis-batch-com", "180");
-  // }, []);
-
   return (
     <div className="flex">
       <div className="w-[200px] p-8 text-lg flex flex-col gap-4 [&_button]:h-10 hover:[&_button]:underline">
